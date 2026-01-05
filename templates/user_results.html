@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }}'s Results{% endblock %}
+{% block content %}
+<h2>{{ user.name }}'s Tax Results</h2>
+<h4>Yearly Data</h4>
+{% if yearly %}
+<ul class="list-group mb-4">
+    <li class="list-group-item">Year: {{ yearly.year }}</li>
+    <li class="list-group-item">Total Hours: {{ yearly.hours }}</li>
+    <li class="list-group-item">Gross: ${{ yearly.gross }}</li>
+    <li class="list-group-item">Total Tax: ${{ yearly.total_tax }}</li>
+    <li class="list-group-item">Net: ${{ yearly.net }}</li>
+</ul>
+{% else %}
+<p>No yearly data found.</p>
+{% endif %}
+<h4>Weekly Data</h4>
+{% if weekly %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Week</th>
+            <th>Hours</th>
+            <th>Gross</th>
+            <th>Total Tax</th>
+            <th>Net</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for w in weekly %}
+        <tr>
+            <td>{{ w.week }}</td>
+            <td>{{ w.hours }}</td>
+            <td>${{ w.gross }}</td>
+            <td>${{ w.total_tax }}</td>
+            <td>${{ w.net }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No weekly data found.</p>
+{% endif %}
+{% endblock %}

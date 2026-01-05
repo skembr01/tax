@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Calculate Taxes{% endblock %}
+{% block content %}
+<h2>Calculate Taxes</h2>
+<form id="taxForm" method="post" class="mb-3">
+    <!-- FIX: Added input for employee name -->
+    <div class="mb-3">
+        <label for="name" class="form-label">Employee Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <!-- FIX: Added input for hours worked -->
+    <div class="mb-3">
+        <label for="hours" class="form-label">Hours Worked</label>
+        <input type="number" class="form-control" id="hours" name="hours" step="1" required>
+    </div>
+    <button type="button" class="btn btn-success" onclick="showConfirmModal()">Calculate</button>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <!-- FIX: Added modal content -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirm Submission</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to submit this tax calculation?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitTaxForm()">Yes, Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showConfirmModal() {
+    var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    myModal.show();
+}
+function submitTaxForm() {
+    document.getElementById('taxForm').submit();
+}
+</script>
+
+{% if result %}
+<div class="alert alert-success mt-4">
+    {{ result|safe }}
+</div>
+{% endif %}
+{% endblock %}

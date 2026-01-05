@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Employee Menu{% endblock %}
+{% block content %}
+<style>
+    .modern-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 600px;
+        margin: auto;
+    }
+    .card-header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+        border-radius: 20px 20px 0 0;
+    }
+    .employee-list {
+        padding: 30px;
+    }
+    .employee-item {
+        font-size: 1.1rem;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    .employee-item:last-child {
+        border-bottom: none;
+    }
+    .bi-person-circle {
+        font-size: 1.5rem;
+        color: #764ba2;
+        margin-right: 12px;
+    }
+</style>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="modern-card">
+        <div class="card-header-gradient">
+            <h2><i class="bi bi-people-fill"></i> Employee Menu</h2>
+        </div>
+        <div class="employee-list">
+            {% if users %}
+                {% for user in users %}
+                    <div class="employee-item" data-bs-toggle="modal" data-bs-target="#employeeModal{{ user.id }}">
+                        <i class="bi bi-person-circle"></i>
+                        {{ user.name }}
+                    </div>
+                    <!-- Modal for employee details -->
+                    <div class="modal fade" id="employeeModal{{ user.id }}" tabindex="-1" aria-labelledby="employeeModalLabel{{ user.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header card-header-gradient">
+                            <h5 class="modal-title" id="employeeModalLabel{{ user.id }}"><i class="bi bi-person-circle"></i> {{ user.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <h6>Weekly Data</h6>
+                            <div class="table-responsive mb-4">
+                              <table class="table table-striped align-middle">
+                                <thead>
+                                  <tr>
+                                    <th>Week</th>
+                                    <th>Hours</th>
+                                    <th>Gross</th>
+                                    <th>Net</th>
+                                    <th>Total Tax</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for w in user.weekly_data %}
+                                  <tr>
+                                    <td>{{ w.week }}</td>
+                                    <td>{{ w.hours }}</td>
+                                    <td>${{ "%.2f"|format(w.gross) }}</td>
+                                    <td>${{ "%.2f"|format(w.net) }}</td>
+                                    <td>${{ "%.2f"|format(w.total_tax) }}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                            <h6>Yearly Data</h6>
+                            <div class="table-responsive">
+                              <table class="table table-striped align-middle">
+                                <thead>
+                                  <tr>
+                                    <th>Year</th>
+                                    <th>Hours</th>
+                                    <th>Gross</th>
+                                    <th>Net</th>
+                                    <th>Total Tax</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for y in user.yearly_data %}
+                                  <tr>
+                                    <td>{{ y.year }}</td>
+                                    <td>{{ y.hours }}</td>
+                                    <td>${{ "%.2f"|format(y.gross) }}</td>
+                                    <td>${{ "%.2f"|format(y.net) }}</td>
+                                    <td>${{ "%.2f"|format(y.total_tax) }}</td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-muted py-4">
+                    No employees found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

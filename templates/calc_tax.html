@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Calculate Taxes{% endblock %}
+{% block content %}
+<style>
+    html, body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        min-height: 100vh !important;
+    }
+    .modern-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+    .card-header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+    }
+    .card-header-gradient h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .form-control {
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa !important;
+    }
+    .form-control:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+        background-color: white !important;
+    }
+    .btn-calculate, .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 30px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        color: white;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .btn-calculate:hover, .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    .btn-calculate:active, .btn-primary:active {
+        transform: translateY(0);
+    }
+    .btn-link {
+        color: #764ba2;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .btn-link:hover {
+        text-decoration: underline;
+        color: #667eea;
+    }
+    .success-alert {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        border: none !important;
+        border-radius: 15px;
+        color: #333;
+        padding: 20px 25px;
+        font-weight: 500;
+        margin-top: 30px;
+        font-size: 1.25rem;
+    }
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 20px 20px 0 0;
+    }
+    .modal-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+    .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    .btn-outline-secondary {
+        border-color: #ddd;
+        color: #666;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #f5f5f5;
+        border-color: #999;
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="col-lg-5 col-md-7 col-sm-10">
+        <div class="modern-card">
+            <div class="card-header-gradient">
+                <h2><i class="bi bi-calculator-fill"></i> Tax Calculator</h2>
+            </div>
+            <div style="padding: 40px 30px;">
+                <form id="taxForm" method="post">
+                    <div class="mb-4" id="employeeSelectSection">
+                        <label for="employeeSelect" class="form-label">Select Employee</label>
+                        <select class="form-control form-control-lg border-0 bg-light" id="employeeSelect" name="employee_id">
+                            <option value="">-- Choose an employee --</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-link mt-2" onclick="showAddEmployee()">+ Add New Employee</button>
+                    </div>
+                    <div class="mb-4" id="addEmployeeSection" style="display:none;">
+                        <label for="name" class="form-label">New Employee Name</label>
+                        <input type="text" class="form-control form-control-lg border-0 bg-light" id="name" name="name" placeholder="Enter full name">
+                        <button type="button" class="btn btn-link mt-2" onclick="hideAddEmployee()">Cancel</button>
+                    </div>
+                    <div class="mb-4">
+                        <label for="hours" class="form-label">Hours Worked</label>
+                        <input type="number" class="form-control form-control-lg border-0 bg-light" id="hours" name="hours" step="1" min="0" required>
+                    </div>
+                    <button type="button" class="btn btn-calculate" onclick="showConfirmModal()">
+                        <i class="bi bi-arrow-right-circle-fill"></i> Calculate Tax
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% if result %}
+        <div id="resultSection" class="alert success-alert alert-dismissible fade show" role="alert">
+            {{ result|safe }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn btn-link mt-2" onclick="resetFormAndScroll()">Calculate for another employee</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirm Submission</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+    <div class="modal-body" style="padding: 25px;">
+        <p style="margin: 0; color: #555; font-size: 1.05rem;">
+            Ready to calculate taxes for <strong id="confirmName"></strong> for <strong id="confirmHours"></strong> hours?
+        </p>
+    </div>
+      <div class="modal-footer" style="border-top: 1px solid #eee;">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitTaxForm()">Confirm & Calculate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showAddEmployee() {
+    document.getElementById('employeeSelectSection').style.display = 'none';
+    document.getElementById('addEmployeeSection').style.display = 'block';
+    document.getElementById('employeeSelect').value = '';
+}
+function hideAddEmployee() {
+    document.getElementById('employeeSelectSection').style.display = 'block';
+    document.getElementById('addEmployeeSection').style.display = 'none';
+    document.getElementById('name').value = '';
+}
+function showConfirmModal() {
+    let name = document.getElementById('name').value;
+    let employeeSelect = document.getElementById('employeeSelect');
+    let hours = document.getElementById('hours').value;
+    if (document.getElementById('taxForm').checkValidity()) {
+        if (employeeSelect.value) {
+            let selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
+            document.getElementById('confirmName').textContent = selectedOption.text;
+        } else {
+            document.getElementById('confirmName').textContent = name;
+        }
+        document.getElementById('confirmHours').textContent = hours;
+        var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        myModal.show();
+    } else {
+        document.getElementById('taxForm').reportValidity();
+    }
+}
+function submitTaxForm() {
+    document.getElementById('taxForm').submit();
+}
+window.onload = function() {
+    if (document.getElementById('resultSection')) {
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function resetFormAndScroll() {
+    document.getElementById('taxForm').reset();
+    hideAddEmployee();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+{% endblock %}

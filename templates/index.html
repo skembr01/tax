@@ -1,19 +1,60 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Basic Flask App</title>
-  </head>
-  <body>
-    <header>
-      <h1>Welcome to Flask</h1>
-    </header>
-    <main>
-      <p>Your basic Flask app is ready to modify!</p>
-    </main>
-    <footer>
-      <small>Built with Flask</small>
-    </footer>
-  </body>
-</html>
+{% extends "base.html" %}
+{% block title %}Home - Tax App{% endblock %}
+{% block content %}
+<style>
+    .modern-card-home {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 600px;
+        margin: auto;
+    }
+    .card-header-gradient-home {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+        border-radius: 20px 20px 0 0;
+    }
+    .card-header-gradient-home h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+    .home-content {
+        padding: 40px 30px;
+        text-align: center;
+    }
+    .btn-calculate-home {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 14px 30px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        color: white;
+        margin-top: 20px;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+    .btn-calculate-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+</style>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="modern-card-home">
+        <div class="card-header-gradient-home">
+            <h1><i class="bi bi-calculator-fill"></i> Tax App</h1>
+        </div>
+        <div class="home-content">
+            <p class="lead mb-4">Welcome! Easily calculate agricultural employee taxes and track weekly and yearly data.</p>
+            <a href="{{ url_for('calc_tax') }}" class="btn btn-calculate-home btn-lg">
+                <i class="bi bi-arrow-right-circle-fill"></i> Start Calculating
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

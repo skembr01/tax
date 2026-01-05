@@ -5,6 +5,9 @@ import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sam/dad_ag_tax_2026/app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_PERMANENT'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(hours=1)
+app.secret_key = 'secret123'
 
 db = SQLAlchemy(app)  # Initialize SQLAlchemy
 
@@ -57,9 +60,27 @@ def health():
 # Get taxes
 @app.route('/calc_tax', methods=['GET', 'POST'])
 def calc_tax():
+    ## all current users
+    users = User.query.order_by(User.name).all()
+    ## result to be provided if GET
+    result = None
     if request.method == 'POST':
-        name = request.form.get('name')  # Get name from form
-        name = name.capitalize()  # Capitalize name
+        employee_id = request.form.get('employee_id')
+        name = request.form.get('name')
+        if employee_id:
+            user = User.query.get(int(employee_id))
+            name = user.name
+        elif name:
+            name = name.capitalize()
+            user = User.query.filter_by(name=name).first()
+            if not user:
+                user = User(name=name)
+                db.session.add(user)
+                db.session.commit()
+        else:
+            return "Please select or add an employee."
+        # name = request.form.get('name')  # Get name from form
+        # name = name.capitalize()  # Capitalize name
         # get hours
         hours = request.form.get('hours', type=int)  # Get hours from form
         income = hours * 14
@@ -210,14 +231,44 @@ def calc_tax():
             db.session.add(yearly_data)
         db.session.commit()
         
-        return f"{name}<br><br>Hours: {hours}<br><br>Gross Income: ${income:.2f}<br><br>Social Security: ${soc_sec:.2f}<br><br>Medicare: ${med:.2f}<br><br>Federal: ${fed_tax:.2f}<br><br>State: ${state_tax:.2f}<br><br>Net Income: ${net_income:.2f}<br><br>Total Tax: ${total_tax:.2f}"
-    return '''
+        result = f"{name}<br><br>Hours: {hours}<br><br>Gross Income: ${income:.2f}<br><br>Social Security: ${soc_sec:.2f}<br><br>Medicare: ${med:.2f}<br><br>Federal: ${fed_tax:.2f}<br><br>State: ${state_tax:.2f}<br><br>Net Income: ${net_income:.2f}<br><br>Total Tax: ${total_tax:.2f}"
+    return render_template('calc_tax.html', result=result, users=users)
+    """return '''
         <form method="post">
             Name: <input type="text" name="name"><br>
             Hours: <input type="number" name="hours" step="1"><br>
             <input type="submit" value="Calculate">
         </form>
     '''
+    """
+
+from flask import Flask, render_template, request, redirect, url_for, session
+
+app.secret_key = "your_secret_key"
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == "LarryPattisamJosh126062823":
+            session["logged_in"] = True
+            return redirect(url_for("user_menu"))
+        else:
+            error = "Invalid credentials"
+    return render_template("login.html", error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/user_menu')
+def user_menu():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    users = User.query.order_by(User.name).all()
+    return render_template('user_menu.html', users=users)
 
 if __name__ == '__main__':
     with app.app_context():
