@@ -269,7 +269,8 @@ def user_menu():
     users = User.query.order_by(User.name).all()
     return render_template('user_menu.html', users=users)
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create database tables only if they don't exist
     app.run(debug=True)
