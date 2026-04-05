@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request  # Added request for handling form data
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
 import datetime
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sam/dad_ag_tax_2026/app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(hours=1)
-app.secret_key = 'secret123'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-only-secret')
 
 db = SQLAlchemy(app)  # Initialize SQLAlchemy
 
@@ -244,14 +245,12 @@ def calc_tax():
 
 from flask import Flask, render_template, request, redirect, url_for, session
 
-app.secret_key = "your_secret_key"
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == "LarryPattisamJosh126062823":
+        if password == os.environ.get('APP_PASSWORD', 'LarryPattisamJosh126062823'):
             session["logged_in"] = True
             return redirect(url_for("user_menu"))
         else:
