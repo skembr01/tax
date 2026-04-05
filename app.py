@@ -250,7 +250,7 @@ def login():
     error = None
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == os.environ.get('APP_PASSWORD', 'LarryPattisamJosh126062823'):
+        if password == os.environ.get('APP_PASSWORD', 'Longview1!!'):
             session["logged_in"] = True
             return redirect(url_for("user_menu"))
         else:
